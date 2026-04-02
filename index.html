@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>District Badminton – Court Booking</title>
+  <style>
+    /* ── Custom Properties ───────────────────────────────────── */
+    :root {
+      --bg:          #0f172a;
+      --surface:     #1e293b;
+      --surface-2:   #334155;
+      --surface-3:   #475569;
+      --accent:      #22d3ee;
+      --accent-dim:  #0891b2;
+      --accent-soft: rgba(34,211,238,.12);
+      --success:     #4ade80;
+      --success-bg:  rgba(74,222,128,.15);
+      --text:        #f1f5f9;
+      --text-muted:  #94a3b8;
+      --text-dim:    #64748b;
+      --radius:      12px;
+      --radius-sm:   8px;
+      --shadow:      0 4px 24px rgba(0,0,0,.4);
+    }
+
+    /* ── Reset / Base ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    button { cursor: pointer; font-family: inherit; }
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ── Confirmation Banner ─────────────────────────────────── */
+    #banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      background: var(--success-bg);
+      border-bottom: 1px solid var(--success);
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 24px;
+      font-size: .9rem;
+      font-weight: 500;
+      transform: translateY(-110%);
+      transition: transform .3s ease;
+    }
+    #banner.visible { transform: translateY(0); }
+    #banner-msg { flex: 1; }
+    #banner-close {
+      background: none;
+      border: none;
+      color: var(--success);
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      opacity: .7;
+    }
+    #banner-close:hover { opacity: 1; }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      padding: 40px 24px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 6px;
+    }
+    .header-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+    header h1 span { color: var(--accent); }
+    .header-meta {
+      color: var(--text-muted);
+      font-size: .875rem;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .header-meta strong { color: var(--text); }
+
+    /* ── Date Strip ──────────────────────────────────────────── */
+    #date-strip-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 28px;
+    }
+    .strip-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    #date-strip {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--surface-2) transparent;
+    }
+    #date-strip::-webkit-scrollbar        { height: 4px; }
+    #date-strip::-webkit-scrollbar-track  { background: transparent; }
+    #date-strip::-webkit-scrollbar-thumb  { background: var(--surface-2); border-radius: 2px; }
+
+    .date-btn {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: var(--surface);
+      border: 1px solid var(--surface-2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      min-width: 68px;
+      transition: border-color .15s, background .15s, transform .15s;
+    }
+    .date-btn:hover:not(.date-btn--selected) {
+      border-color: var(--surface-3);
+      background: var(--surface-2);
+      transform: translateY(-1px);
+    }
+    .date-btn__day {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .date-btn__num {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+    }
+    .date-btn__month {
+      font-size: .65rem;
+      color: var(--text-muted);
+    }
+    /* Today indicator — cyan dot above day name */
+    .date-btn--today .date-btn__day::before {
+      content: "● ";
+      color: var(--accent);
+      font-size: .5rem;
+      vertical-align: middle;
+    }
+    /* Selected state */
+    .date-btn--selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(34,211,238,.3);
+    }
+    .date-btn--selected .date-btn__day,
+    .date-btn--selected .date-btn__num,
+    .date-btn--selected .date-btn__month { color: #0f172a; }
+    .date-btn--selected .date-btn__day::before { color: #0f172a; }
+
+    /* ── Main / Courts Grid ──────────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-label {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .section-date-badge {
+      font-size: .75rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    #courts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── Court Card ──────────────────────────────────────────── */
+    .court-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-2);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .court-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: var(--surface-3);
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-emoji {
+      font-size: 1.6rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .card-title { flex: 1; }
+    .card-title h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .card-location {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .card-location::before {
+      content: "📍";
+      font-size: .75rem;
+      flex-shrink: 0;
+    }
+    .card-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      font-size: .75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .stat-pill.available {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .stat-pill.booked {
+      background: rgba(148,163,184,.1);
+      color: var(--text-muted);
+    }
+    .btn-view {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--surface-3);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: .875rem;
+      font-weight: 500;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn-view:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0f172a;
+    }
+
+    /* ── Modal Overlay ───────────────────────────────────────── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal {
+      background: var(--surface);
+      border: 1px solid var(--surface-2);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      animation: modalIn .2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0);    }
+    }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 20px 0;
+      gap: 12px;
+    }
+    .modal-title-group { flex: 1; }
+    .modal-title-group h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .modal-subtitle {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .modal-date-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .btn-close {
+      background: var(--surface-2);
+      border: none;
+      color: var(--text-muted);
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .btn-close:hover {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+    .modal-body { padding: 20px; }
+    .period-group { margin-bottom: 20px; }
+    .period-group:last-child { margin-bottom: 0; }
+    .period-label {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .slots-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ── Slot Buttons ────────────────────────────────────────── */
+    .slot-btn {
+      background: transparent;
+      border: 1px solid var(--surface-3);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: .8rem;
+      font-weight: 500;
+      transition: all .15s ease;
+      white-space: nowrap;
+    }
+    .slot-btn:hover:not(.slot-btn--booked) {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .slot-btn--booked {
+      background: var(--accent-dim);
+      border-color: var(--accent-dim);
+      color: #0f172a;
+      font-weight: 600;
+    }
+    .slot-btn--booked:hover {
+      background: #e11d48;
+      border-color: #e11d48;
+      color: #fff;
+    }
+    .slot-btn--booked .slot-badge {
+      font-size: .65rem;
+      opacity: .85;
+      margin-left: 4px;
+    }
+    .modal-hint {
+      margin-top: 18px;
+      padding: 10px 14px;
+      background: rgba(148,163,184,.07);
+      border-radius: var(--radius-sm);
+      font-size: .75rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Confirmation Banner -->
+  <div id="banner" role="status" aria-live="polite">
+    <span id="banner-msg"></span>
+    <button id="banner-close" data-action="close-banner" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-top">
+      <span class="header-icon">🏸</span>
+      <h1>District <span>Badminton</span></h1>
+    </div>
+    <div class="header-meta">
+      <span>Book courts at your local sports centers</span>
+      <span>Today: <strong id="today-date"></strong></span>
+    </div>
+  </header>
+
+  <!-- Date Strip -->
+  <div id="date-strip-wrapper">
+    <p class="strip-label">Select a date</p>
+    <div id="date-strip" role="group" aria-label="Date selector"></div>
+  </div>
+
+  <!-- Courts Grid -->
+  <main>
+    <div class="section-header">
+      <p class="section-label">Available Courts</p>
+      <span class="section-date-badge" id="section-date-badge"></span>
+    </div>
+    <div id="courts-grid"></div>
+  </main>
+
+  <!-- Booking Modal -->
+  <div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-court-name">
+    <div id="modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 id="modal-court-name"></h3>
+          <p class="modal-subtitle" id="modal-court-loc"></p>
+          <p class="modal-date-line" id="modal-date-line"></p>
+        </div>
+        <button class="btn-close" data-action="close-modal" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ────────────────────────────────────────────────────────────
+       DATA LAYER — hardcoded courts & time slots
+    ──────────────────────────────────────────────────────────── */
+    const COURTS = [
+      {
+        id: "court-1",
+        name: "Smash Arena – Court 1",
+        location: "Block A, Level 2, District Sports Complex",
+        emoji: "🏸",
+        slots: [
+          { id: "c1-s1", time: "07:00 – 08:00", period: "Morning"   },
+          { id: "c1-s2", time: "08:00 – 09:00", period: "Morning"   },
+          { id: "c1-s3", time: "09:00 – 10:00", period: "Morning"   },
+          { id: "c1-s4", time: "12:00 – 13:00", period: "Afternoon" },
+          { id: "c1-s5", time: "13:00 – 14:00", period: "Afternoon" },
+          { id: "c1-s6", time: "18:00 – 19:00", period: "Evening"   },
+          { id: "c1-s7", time: "19:00 – 20:00", period: "Evening"   },
+          { id: "c1-s8", time: "20:00 – 21:00", period: "Evening"   },
+        ],
+      },
+      {
+        id: "court-2",
+        name: "Rally Point – Court 2",
+        location: "Block B, Level 1, District Sports Complex",
+        emoji: "🎯",
+        slots: [
+          { id: "c2-s1", time: "06:00 – 07:00", period: "Morning"   },
+          { id: "c2-s2", time: "07:00 – 08:00", period: "Morning"   },
+          { id: "c2-s3", time: "08:00 – 09:00", period: "Morning"   },
+          { id: "c2-s4", time: "11:00 – 12:00", period: "Afternoon" },
+          { id: "c2-s5", time: "14:00 – 15:00", period: "Afternoon" },
+          { id: "c2-s6", time: "17:00 – 18:00", period: "Evening"   },
+          { id: "c2-s7", time: "18:00 – 19:00", period: "Evening"   },
+          { id: "c2-s8", time: "20:00 – 21:00", period: "Evening"   },
+        ],
+      },
+      {
+        id: "court-3",
+        name: "Shuttle Bay – Court 3",
+        location: "East Wing, Greenfield Sports Hub",
+        emoji: "⚡",
+        slots: [
+          { id: "c3-s1", time: "07:00 – 08:00", period: "Morning"   },
+          { id: "c3-s2", time: "09:00 – 10:00", period: "Morning"   },
+          { id: "c3-s3", time: "10:00 – 11:00", period: "Morning"   },
+          { id: "c3-s4", time: "12:00 – 13:00", period: "Afternoon" },
+          { id: "c3-s5", time: "15:00 – 16:00", period: "Afternoon" },
+          { id: "c3-s6", time: "16:00 – 17:00", period: "Afternoon" },
+          { id: "c3-s7", time: "19:00 – 20:00", period: "Evening"   },
+          { id: "c3-s8", time: "21:00 – 22:00", period: "Evening"   },
+        ],
+      },
+      {
+        id: "court-4",
+        name: "Net Zone – Court 4",
+        location: "West Wing, Greenfield Sports Hub",
+        emoji: "🌟",
+        slots: [
+          { id: "c4-s1", time: "06:00 – 07:00", period: "Morning"   },
+          { id: "c4-s2", time: "08:00 – 09:00", period: "Morning"   },
+          { id: "c4-s3", time: "10:00 – 11:00", period: "Morning"   },
+          { id: "c4-s4", time: "13:00 – 14:00", period: "Afternoon" },
+          { id: "c4-s5", time: "14:00 – 15:00", period: "Afternoon" },
+          { id: "c4-s6", time: "17:00 – 18:00", period: "Evening"   },
+          { id: "c4-s7", time: "18:00 – 19:00", period: "Evening"   },
+          { id: "c4-s8", time: "20:00 – 21:00", period: "Evening"   },
+        ],
+      },
+    ];
+
+    /* ────────────────────────────────────────────────────────────
+       DATE HELPERS
+    ──────────────────────────────────────────────────────────── */
+
+    // Returns "YYYY-MM-DD" in local time (avoids UTC offset issues)
+    function dateToKey(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    // Composite booking key: unique per date AND slot
+    function bookingKey(dateKey, slotId) {
+      return `${dateKey}::${slotId}`;
+    }
+
+    // Build the 8-day window starting today
+    function buildDays() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return Array.from({ length: 8 }, (_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        return {
+          key:     dateToKey(d),
+          dayName: d.toLocaleDateString("en-GB", { weekday: "short" }),
+          dayNum:  d.getDate(),
+          month:   d.toLocaleDateString("en-GB", { month: "short" }),
+          isToday: i === 0,
+          full:    d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+        };
+      });
+    }
+
+    const DAYS = buildDays();
+
+    /* ────────────────────────────────────────────────────────────
+       STATE — in-memory only, resets on page refresh
+    ──────────────────────────────────────────────────────────── */
+    // bookings key: "YYYY-MM-DD::slotId" → { courtName, time, date }
+    const bookings    = new Map();
+    let selectedDate  = DAYS[0].key;   // default: today
+    let activeCourtId = null;
+    let bannerTimer   = null;
+
+    /* ────────────────────────────────────────────────────────────
+       HELPERS
+    ──────────────────────────────────────────────────────────── */
+    const $ = (id) => document.getElementById(id);
+
+    function groupSlotsByPeriod(slots) {
+      const ORDER = ["Morning", "Afternoon", "Evening"];
+      return ORDER.reduce((acc, period) => {
+        const group = slots.filter(s => s.period === period);
+        if (group.length) acc[period] = group;
+        return acc;
+      }, {});
+    }
+
+    function selectedDayObj() {
+      return DAYS.find(d => d.key === selectedDate) ?? DAYS[0];
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       RENDER — Date Strip
+    ──────────────────────────────────────────────────────────── */
+    function renderDateStrip() {
+      const html = DAYS.map(d => {
+        const isSelected = d.key === selectedDate;
+        const classes = [
+          "date-btn",
+          d.isToday    ? "date-btn--today"    : "",
+          isSelected   ? "date-btn--selected" : "",
+        ].filter(Boolean).join(" ");
+
+        return `
+          <button
+            class="${classes}"
+            data-action="select-date"
+            data-date="${d.key}"
+            aria-pressed="${isSelected}"
+            aria-label="${d.full}${d.isToday ? " (Today)" : ""}"
+          >
+            <span class="date-btn__day">${d.dayName}</span>
+            <span class="date-btn__num">${d.dayNum}</span>
+            <span class="date-btn__month">${d.month}</span>
+          </button>`;
+      }).join("");
+
+      $("date-strip").innerHTML = html;
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       RENDER — Courts Grid
+    ──────────────────────────────────────────────────────────── */
+    function renderCourts() {
+      // Update the section badge to show which date is selected
+      const day = selectedDayObj();
+      $("section-date-badge").textContent =
+        day.isToday ? `Today · ${day.dayNum} ${day.month}` : `${day.dayName} · ${day.dayNum} ${day.month}`;
+
+      const html = COURTS.map(court => {
+        const totalSlots  = court.slots.length;
+        const bookedCount = court.slots.filter(
+          s => bookings.has(bookingKey(selectedDate, s.id))
+        ).length;
+        const freeCount   = totalSlots - bookedCount;
+
+        return `
+          <article class="court-card">
+            <div class="card-header">
+              <span class="card-emoji">${court.emoji}</span>
+              <div class="card-title">
+                <h2>${court.name}</h2>
+                <p class="card-location">${court.location}</p>
+              </div>
+            </div>
+            <div class="card-stats">
+              <span class="stat-pill available">${freeCount} available</span>
+              ${bookedCount > 0 ? `<span class="stat-pill booked">${bookedCount} booked by you</span>` : ""}
+            </div>
+            <button
+              class="btn-view"
+              data-action="open-modal"
+              data-court="${court.id}"
+              aria-label="View slots for ${court.name}"
+            >View Slots →</button>
+          </article>`;
+      }).join("");
+
+      $("courts-grid").innerHTML = html;
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       RENDER — Booking Modal
+    ──────────────────────────────────────────────────────────── */
+    function renderModal(courtId) {
+      const court = COURTS.find(c => c.id === courtId);
+      if (!court) return;
+
+      const day = selectedDayObj();
+
+      $("modal-court-name").textContent = court.name;
+      $("modal-court-loc").textContent  = court.location;
+      $("modal-date-line").textContent  =
+        `📅 ${day.full}${day.isToday ? " (Today)" : ""}`;
+
+      const grouped = groupSlotsByPeriod(court.slots);
+
+      const periodsHtml = Object.entries(grouped).map(([period, slots]) => {
+        const slotsHtml = slots.map(slot => {
+          const key      = bookingKey(selectedDate, slot.id);
+          const isBooked = bookings.has(key);
+          return `
+            <button
+              class="slot-btn${isBooked ? " slot-btn--booked" : ""}"
+              data-action="book-slot"
+              data-slot="${slot.id}"
+              data-court="${court.id}"
+              aria-pressed="${isBooked}"
+              title="${isBooked ? "Click to cancel booking" : "Click to book"}"
+            >${slot.time}${isBooked ? '<span class="slot-badge">✓ Booked</span>' : ""}</button>`;
+        }).join("");
+
+        return `
+          <div class="period-group">
+            <p class="period-label">${period}</p>
+            <div class="slots-row">${slotsHtml}</div>
+          </div>`;
+      }).join("");
+
+      $("modal-body").innerHTML = periodsHtml + `
+        <p class="modal-hint">
+          Tap an available slot to book it. Tap a booked slot (hover shows red) to cancel.
+        </p>`;
+
+      const overlay = $("modal-overlay");
+      overlay.classList.add("open");
+      activeCourtId = courtId;
+
+      const firstBtn = overlay.querySelector("button");
+      if (firstBtn) firstBtn.focus();
+    }
+
+    function closeModal() {
+      $("modal-overlay").classList.remove("open");
+      activeCourtId = null;
+      renderCourts();
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       RENDER — Confirmation Banner
+    ──────────────────────────────────────────────────────────── */
+    function showBanner(message) {
+      clearTimeout(bannerTimer);
+      const banner = $("banner");
+      $("banner-msg").textContent = message;
+      banner.classList.add("visible");
+      bannerTimer = setTimeout(() => banner.classList.remove("visible"), 3500);
+    }
+
+    function hideBanner() {
+      clearTimeout(bannerTimer);
+      $("banner").classList.remove("visible");
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       EVENT DELEGATION — single listener on body
+    ──────────────────────────────────────────────────────────── */
+    document.body.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-action]");
+      if (!el) return;
+
+      const action = el.dataset.action;
+
+      if (action === "select-date") {
+        selectedDate = el.dataset.date;
+        renderDateStrip();
+        renderCourts();
+        return;
+      }
+
+      if (action === "open-modal") {
+        renderModal(el.dataset.court);
+        return;
+      }
+
+      if (action === "close-modal") {
+        closeModal();
+        return;
+      }
+
+      if (action === "close-banner") {
+        hideBanner();
+        return;
+      }
+
+      if (action === "book-slot") {
+        const slotId  = el.dataset.slot;
+        const courtId = el.dataset.court;
+        const court   = COURTS.find(c => c.id === courtId);
+        const slot    = court?.slots.find(s => s.id === slotId);
+        if (!court || !slot) return;
+
+        const key = bookingKey(selectedDate, slotId);
+        const day = selectedDayObj();
+
+        if (bookings.has(key)) {
+          bookings.delete(key);
+        } else {
+          bookings.set(key, { courtName: court.name, time: slot.time, date: selectedDate });
+          const dateLabel = day.isToday ? "Today" : `${day.dayName} ${day.dayNum} ${day.month}`;
+          showBanner(`Booked: ${court.name} · ${slot.time} · ${dateLabel}`);
+        }
+
+        renderModal(courtId);
+        return;
+      }
+    });
+
+    // Close modal on backdrop click
+    $("modal-overlay").addEventListener("click", (e) => {
+      if (e.target === $("modal-overlay")) closeModal();
+    });
+
+    /* ────────────────────────────────────────────────────────────
+       KEYBOARD HANDLING
+    ──────────────────────────────────────────────────────────── */
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && activeCourtId !== null) {
+        closeModal();
+        return;
+      }
+
+      if (e.key === "Tab" && activeCourtId !== null) {
+        const modal     = $("modal");
+        const focusable = [...modal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )];
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+        const last  = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+        }
+      }
+    });
+
+    /* ────────────────────────────────────────────────────────────
+       INIT
+    ──────────────────────────────────────────────────────────── */
+    document.addEventListener("DOMContentLoaded", () => {
+      $("today-date").textContent = new Date().toLocaleDateString("en-GB", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric"
+      });
+
+      renderDateStrip();
+      renderCourts();
+    });
+  </script>
+</body>
+</html>
