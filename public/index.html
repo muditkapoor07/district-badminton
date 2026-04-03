@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>District Badminton – Court Booking</title>
   <style>
-    /* ── Custom Properties ───────────────────────────────────── */
     :root {
       --bg:          #0f172a;
       --surface:     #1e293b;
@@ -18,6 +17,8 @@
       --success-bg:  rgba(74,222,128,.15);
       --danger:      #f43f5e;
       --danger-soft: rgba(244,63,94,.12);
+      --warn:        #fb923c;
+      --warn-soft:   rgba(251,146,60,.12);
       --text:        #f1f5f9;
       --text-muted:  #94a3b8;
       --text-dim:    #64748b;
@@ -25,309 +26,280 @@
       --radius-sm:   8px;
       --shadow:      0 4px 24px rgba(0,0,0,.4);
     }
-
-    /* ── Reset / Base ────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; }
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      line-height: 1.5;
+      min-height: 100vh; line-height: 1.5;
     }
     button { cursor: pointer; font-family: inherit; }
     button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    input  { font-family: inherit; }
-    input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    input:focus-visible  { outline: 2px solid var(--accent); outline-offset: 2px; }
+    input { font-family: inherit; }
 
-    /* ── Confirmation Banner ─────────────────────────────────── */
+    /* ── Banner ─────────────────────────────────────────────── */
     #banner {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 300;
-      background: var(--success-bg);
-      border-bottom: 1px solid var(--success);
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 24px;
-      font-size: .9rem;
-      font-weight: 500;
-      transform: translateY(-110%);
-      transition: transform .3s ease;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      background: var(--success-bg); border-bottom: 1px solid var(--success);
+      color: var(--success); display: flex; align-items: center;
+      justify-content: space-between; gap: 12px; padding: 14px 24px;
+      font-size: .9rem; font-weight: 500;
+      transform: translateY(-110%); transition: transform .3s ease;
     }
     #banner.visible { transform: translateY(0); }
     #banner-msg { flex: 1; }
     #banner-close {
-      background: none;
-      border: none;
-      color: var(--success);
-      font-size: 1.1rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      opacity: .7;
+      background: none; border: none; color: var(--success);
+      font-size: 1.1rem; padding: 2px 6px; border-radius: 4px; opacity: .7;
     }
     #banner-close:hover { opacity: 1; }
 
-    /* ── Header ──────────────────────────────────────────────── */
+    /* ── Header ─────────────────────────────────────────────── */
     header {
-      padding: 40px 24px 20px;
-      max-width: 1100px;
-      margin: 0 auto;
+      padding: 32px 24px 18px; max-width: 1100px; margin: 0 auto;
     }
     .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 6px;
     }
-    .header-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+    .header-top { display: flex; align-items: center; gap: 14px; }
     .header-icon { font-size: 2rem; line-height: 1; }
-    header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      letter-spacing: -.02em;
-    }
+    header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; }
     header h1 span { color: var(--accent); }
     .header-meta {
-      color: var(--text-muted);
-      font-size: .875rem;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      color: var(--text-muted); font-size: .875rem; display: flex; gap: 20px; flex-wrap: wrap;
     }
     .header-meta strong { color: var(--text); }
 
-    /* ── User Menu ───────────────────────────────────────────── */
-    #user-area {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    #user-greeting {
-      font-size: .85rem;
-      color: var(--text-muted);
-    }
+    /* ── User Area ──────────────────────────────────────────── */
+    #user-area { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    #user-greeting { font-size: .85rem; color: var(--text-muted); }
     #user-greeting strong { color: var(--text); }
     .btn-auth {
-      padding: 8px 16px;
-      border-radius: var(--radius-sm);
-      font-size: .85rem;
-      font-weight: 600;
-      border: 1px solid transparent;
-      transition: all .15s;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font-size: .85rem; font-weight: 600; border: 1px solid transparent; transition: all .15s;
     }
-    .btn-auth--primary {
-      background: var(--accent);
-      color: #0f172a;
-    }
+    .btn-auth--primary { background: var(--accent); color: #0f172a; }
     .btn-auth--primary:hover { background: #67e8f9; }
     .btn-auth--ghost {
-      background: transparent;
-      border-color: var(--surface-2);
-      color: var(--text-muted);
+      background: transparent; border-color: var(--surface-2); color: var(--text-muted);
     }
-    .btn-auth--ghost:hover {
-      border-color: var(--surface-3);
-      color: var(--text);
+    .btn-auth--ghost:hover { border-color: var(--surface-3); color: var(--text); }
+    .btn-my-bookings {
+      background: var(--surface); border: 1px solid var(--surface-2);
+      color: var(--text-muted); padding: 8px 14px;
+      border-radius: var(--radius-sm); font-size: .85rem; font-weight: 500;
+      transition: all .15s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-my-bookings:hover { border-color: var(--accent); color: var(--accent); }
+    .my-bookings-count {
+      background: var(--accent); color: #0f172a; font-size: .65rem;
+      font-weight: 700; padding: 1px 6px; border-radius: 10px; min-width: 18px;
+      text-align: center;
     }
 
-    /* ── Date Strip ──────────────────────────────────────────── */
+    /* ── Date Strip ─────────────────────────────────────────── */
     #date-strip-wrapper {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px 28px;
+      max-width: 1100px; margin: 0 auto; padding: 0 24px 20px;
     }
     .strip-label {
-      font-size: .7rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 10px;
+      font-size: .7rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
     }
     #date-strip {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--surface-2) transparent;
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+      scrollbar-width: thin; scrollbar-color: var(--surface-2) transparent;
     }
     #date-strip::-webkit-scrollbar        { height: 4px; }
     #date-strip::-webkit-scrollbar-track  { background: transparent; }
     #date-strip::-webkit-scrollbar-thumb  { background: var(--surface-2); border-radius: 2px; }
     .date-btn {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      background: var(--surface);
-      border: 1px solid var(--surface-2);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      min-width: 68px;
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; background: var(--surface); border: 1px solid var(--surface-2);
+      border-radius: var(--radius-sm); padding: 10px 14px; min-width: 68px;
       transition: border-color .15s, background .15s, transform .15s;
     }
     .date-btn:hover:not(.date-btn--selected) {
-      border-color: var(--surface-3);
-      background: var(--surface-2);
-      transform: translateY(-1px);
+      border-color: var(--surface-3); background: var(--surface-2); transform: translateY(-1px);
     }
     .date-btn__day {
-      font-size: .65rem;
-      font-weight: 700;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-      color: var(--text-dim);
+      font-size: .65rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-dim);
     }
-    .date-btn__num {
-      font-size: 1.25rem;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--text);
-    }
+    .date-btn__num  { font-size: 1.25rem; font-weight: 700; line-height: 1; color: var(--text); }
     .date-btn__month { font-size: .65rem; color: var(--text-muted); }
     .date-btn--today .date-btn__day::before {
-      content: "● ";
-      color: var(--accent);
-      font-size: .5rem;
-      vertical-align: middle;
+      content: "● "; color: var(--accent); font-size: .5rem; vertical-align: middle;
     }
     .date-btn--selected {
-      background: var(--accent);
-      border-color: var(--accent);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(34,211,238,.3);
+      background: var(--accent); border-color: var(--accent);
+      transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,211,238,.3);
     }
     .date-btn--selected .date-btn__day,
     .date-btn--selected .date-btn__num,
     .date-btn--selected .date-btn__month { color: #0f172a; }
     .date-btn--selected .date-btn__day::before { color: #0f172a; }
 
-    /* ── Main / Courts Grid ──────────────────────────────────── */
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px 60px;
+    /* ── Search + Time Filter Bar ───────────────────────────── */
+    #filter-bar {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px 20px;
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
     }
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      margin-bottom: 16px;
+    .search-wrap {
+      position: relative; flex: 1; min-width: 200px;
     }
-    .section-label {
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); font-size: .9rem; pointer-events: none;
     }
-    .section-date-badge { font-size: .75rem; color: var(--accent); font-weight: 500; }
-    #courts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
+    #search-input {
+      width: 100%; background: var(--surface); border: 1px solid var(--surface-2);
+      border-radius: var(--radius-sm); color: var(--text); padding: 9px 12px 9px 36px;
+      font-size: .875rem; transition: border-color .15s;
+    }
+    #search-input:focus { outline: none; border-color: var(--accent); }
+    #search-input::placeholder { color: var(--text-dim); }
+    .time-pills { display: flex; gap: 6px; flex-shrink: 0; }
+    .time-pill {
+      background: var(--surface); border: 1px solid var(--surface-2);
+      color: var(--text-muted); padding: 8px 14px; border-radius: 20px;
+      font-size: .8rem; font-weight: 500; transition: all .15s;
+    }
+    .time-pill:hover { border-color: var(--surface-3); color: var(--text); }
+    .time-pill--active {
+      background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
     }
 
-    /* ── Court Card ──────────────────────────────────────────── */
+    /* ── Main / Courts Grid ─────────────────────────────────── */
+    main { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+    .section-header {
+      display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px;
+    }
+    .section-label {
+      font-size: .75rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .section-date-badge { font-size: .75rem; color: var(--accent); font-weight: 500; }
+    .no-results {
+      grid-column: 1/-1; text-align: center; padding: 48px 24px;
+      color: var(--text-dim); font-size: .9rem;
+    }
+    #courts-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
+    }
+
+    /* ── Court Card ─────────────────────────────────────────── */
     .court-card {
-      background: var(--surface);
-      border: 1px solid var(--surface-2);
-      border-radius: var(--radius);
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      background: var(--surface); border: 1px solid var(--surface-2);
+      border-radius: var(--radius); padding: 20px; display: flex;
+      flex-direction: column; gap: 12px;
       transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
     .court-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow);
-      border-color: var(--surface-3);
+      transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--surface-3);
     }
-    .card-header { display: flex; align-items: flex-start; gap: 12px; }
-    .card-emoji { font-size: 1.6rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
-    .card-title { flex: 1; }
-    .card-title h2 { font-size: 1rem; font-weight: 600; line-height: 1.3; }
+    .card-header { display: flex; align-items: flex-start; gap: 10px; }
+    .card-emoji  { font-size: 1.5rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+    .card-title  { flex: 1; }
+    .card-title h2 { font-size: .95rem; font-weight: 600; line-height: 1.3; }
     .card-location {
-      font-size: .8rem; color: var(--text-muted); margin-top: 3px;
+      font-size: .78rem; color: var(--text-muted); margin-top: 2px;
       display: flex; align-items: flex-start; gap: 4px;
     }
-    .card-location::before { content: "📍"; font-size: .75rem; flex-shrink: 0; }
-    .card-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .card-location::before { content: "📍"; font-size: .72rem; flex-shrink: 0; }
+
+    /* Price badge */
+    .price-badge {
+      flex-shrink: 0; text-align: right;
+    }
+    .price-badge__amount {
+      font-size: 1rem; font-weight: 700; color: var(--accent); line-height: 1;
+    }
+    .price-badge__amount span { font-size: .65rem; font-weight: 500; color: var(--text-dim); }
+    .price-badge__surge {
+      font-size: .65rem; font-weight: 600; color: var(--warn);
+      margin-top: 2px; white-space: nowrap;
+    }
+    .price-badge__tags { display: flex; gap: 4px; justify-content: flex-end; margin-top: 3px; }
+    .badge-tag {
+      font-size: .6rem; font-weight: 700; padding: 1px 6px;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge-tag--weekend { background: var(--warn-soft); color: var(--warn); }
+    .badge-tag--surge   { background: rgba(239,68,68,.15); color: #f87171; }
+
+    .card-stats { display: flex; gap: 8px; flex-wrap: wrap; }
     .stat-pill {
-      font-size: .75rem; padding: 3px 10px;
-      border-radius: 20px; font-weight: 500;
+      font-size: .72rem; padding: 2px 10px; border-radius: 20px; font-weight: 500;
     }
     .stat-pill.available { background: var(--accent-soft); color: var(--accent); }
     .stat-pill.booked    { background: rgba(148,163,184,.1); color: var(--text-muted); }
+
+    /* Progress bar */
+    .court-progress-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .court-progress {
+      height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden;
+    }
+    .court-progress__bar {
+      height: 100%; border-radius: 3px; transition: width .4s ease;
+    }
+    .court-progress__bar--low    { background: var(--success); }
+    .court-progress__bar--medium { background: var(--warn); }
+    .court-progress__bar--high   { background: var(--danger); }
+    .court-progress__label {
+      font-size: .7rem; color: var(--text-dim);
+      display: flex; justify-content: space-between;
+    }
+
     .btn-view {
-      width: 100%;
-      background: var(--surface-2);
-      border: 1px solid var(--surface-3);
-      color: var(--text);
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
+      width: 100%; background: var(--surface-2); border: 1px solid var(--surface-3);
+      color: var(--text); padding: 10px 16px; border-radius: var(--radius-sm);
       font-size: .875rem; font-weight: 500;
       transition: background .15s, border-color .15s, color .15s;
     }
-    .btn-view:hover {
-      background: var(--accent); border-color: var(--accent); color: #0f172a;
-    }
+    .btn-view:hover { background: var(--accent); border-color: var(--accent); color: #0f172a; }
 
-    /* ── Booking Modal ───────────────────────────────────────── */
+    /* ── Booking Modal ──────────────────────────────────────── */
     #modal-overlay {
-      display: none;
-      position: fixed; inset: 0; z-index: 100;
-      background: rgba(0,0,0,.65);
-      backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
-      padding: 20px;
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
     }
     #modal-overlay.open { display: flex; }
     #modal {
-      background: var(--surface);
-      border: 1px solid var(--surface-2);
-      border-radius: var(--radius);
-      width: 100%; max-width: 480px; max-height: 90vh;
-      overflow-y: auto; box-shadow: var(--shadow);
+      background: var(--surface); border: 1px solid var(--surface-2);
+      border-radius: var(--radius); width: 100%; max-width: 480px;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow);
       animation: modalIn .2s ease;
     }
     @keyframes modalIn {
       from { opacity: 0; transform: scale(.96) translateY(8px); }
-      to   { opacity: 1; transform: scale(1)  translateY(0);    }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
     }
     .modal-header {
-      display: flex; align-items: flex-start;
-      justify-content: space-between;
+      display: flex; align-items: flex-start; justify-content: space-between;
       padding: 20px 20px 0; gap: 12px;
     }
     .modal-title-group { flex: 1; }
     .modal-title-group h3 { font-size: 1.05rem; font-weight: 600; }
     .modal-subtitle { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
+    .modal-meta-row {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center;
+    }
     .modal-date-line {
       display: inline-flex; align-items: center; gap: 5px;
-      margin-top: 6px; font-size: .78rem; font-weight: 600;
-      color: var(--accent); background: var(--accent-soft);
-      padding: 3px 10px; border-radius: 20px;
+      font-size: .78rem; font-weight: 600; color: var(--accent);
+      background: var(--accent-soft); padding: 3px 10px; border-radius: 20px;
+    }
+    .modal-price-line {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .78rem; font-weight: 700; color: var(--warn);
+      background: var(--warn-soft); padding: 3px 10px; border-radius: 20px;
     }
     .btn-close {
-      background: var(--surface-2); border: none;
-      color: var(--text-muted); width: 32px; height: 32px;
-      border-radius: 50%; font-size: 1rem;
+      background: var(--surface-2); border: none; color: var(--text-muted);
+      width: 32px; height: 32px; border-radius: 50%; font-size: 1rem;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: background .15s, color .15s;
     }
@@ -339,80 +311,54 @@
       font-size: .7rem; font-weight: 600; letter-spacing: .08em;
       text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px;
     }
+    .period-group--dimmed { opacity: .35; pointer-events: none; }
     .slots-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    /* ── Slot Buttons ────────────────────────────────────────── */
+    /* Slot buttons */
     .slot-btn {
-      background: transparent;
-      border: 1px solid var(--surface-3);
-      color: var(--text-muted);
-      padding: 7px 14px; border-radius: 20px;
-      font-size: .8rem; font-weight: 500;
-      transition: all .15s ease; white-space: nowrap;
+      background: transparent; border: 1px solid var(--surface-3);
+      color: var(--text-muted); padding: 7px 14px; border-radius: 20px;
+      font-size: .8rem; font-weight: 500; transition: all .15s; white-space: nowrap;
     }
     .slot-btn:hover:not(.slot-btn--mine):not(.slot-btn--taken) {
-      border-color: var(--accent); color: var(--accent);
-      background: var(--accent-soft);
+      border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
     }
-    /* Booked by current user */
     .slot-btn--mine {
       background: var(--accent-dim); border-color: var(--accent-dim);
       color: #0f172a; font-weight: 600;
     }
-    .slot-btn--mine:hover {
-      background: var(--danger); border-color: var(--danger); color: #fff;
-    }
+    .slot-btn--mine:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
     .slot-btn--mine .slot-badge { font-size: .65rem; opacity: .85; margin-left: 4px; }
-    /* Booked by someone else */
     .slot-btn--taken {
-      background: rgba(148,163,184,.07);
-      border-color: var(--surface-2);
-      color: var(--text-dim);
-      cursor: not-allowed; opacity: .6;
+      background: rgba(148,163,184,.07); border-color: var(--surface-2);
+      color: var(--text-dim); cursor: not-allowed; opacity: .55;
     }
     .modal-sign-in-note {
-      margin-bottom: 16px;
-      padding: 10px 14px;
-      background: var(--accent-soft);
-      border: 1px solid rgba(34,211,238,.2);
-      border-radius: var(--radius-sm);
-      font-size: .8rem;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      margin-bottom: 16px; padding: 10px 14px;
+      background: var(--accent-soft); border: 1px solid rgba(34,211,238,.2);
+      border-radius: var(--radius-sm); font-size: .8rem; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
     }
     .modal-sign-in-note button {
-      background: none; border: none;
-      color: var(--accent); font-size: .8rem;
-      font-weight: 700; text-decoration: underline;
-      padding: 0; cursor: pointer;
+      background: none; border: none; color: var(--accent);
+      font-size: .8rem; font-weight: 700; text-decoration: underline; padding: 0;
     }
     .modal-hint {
-      margin-top: 18px; padding: 10px 14px;
-      background: rgba(148,163,184,.07);
-      border-radius: var(--radius-sm);
-      font-size: .75rem; color: var(--text-dim);
+      margin-top: 18px; padding: 10px 14px; background: rgba(148,163,184,.07);
+      border-radius: var(--radius-sm); font-size: .75rem; color: var(--text-dim);
     }
 
-    /* ── Auth Modal ──────────────────────────────────────────── */
+    /* ── Auth Modal ─────────────────────────────────────────── */
     #auth-overlay {
-      display: none;
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(0,0,0,.75);
-      backdrop-filter: blur(6px);
-      align-items: center; justify-content: center;
-      padding: 20px;
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 20px;
     }
     #auth-overlay.open { display: flex; }
     #auth-modal {
-      background: var(--surface);
-      border: 1px solid var(--surface-2);
-      border-radius: var(--radius);
-      width: 100%; max-width: 400px;
-      box-shadow: var(--shadow);
-      animation: modalIn .2s ease;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--surface-2);
+      border-radius: var(--radius); width: 100%; max-width: 400px;
+      box-shadow: var(--shadow); animation: modalIn .2s ease; overflow: hidden;
     }
     .auth-top {
       display: flex; align-items: center; justify-content: space-between;
@@ -420,29 +366,17 @@
     }
     .auth-top h2 { font-size: 1.1rem; font-weight: 700; }
     .auth-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--surface-2);
-      margin-top: 16px;
+      display: flex; border-bottom: 1px solid var(--surface-2); margin-top: 16px;
     }
     .auth-tab {
-      flex: 1;
-      background: none; border: none;
-      padding: 12px;
-      font-size: .85rem; font-weight: 600;
-      color: var(--text-dim);
-      border-bottom: 2px solid transparent;
-      transition: color .15s, border-color .15s;
+      flex: 1; background: none; border: none; padding: 12px;
+      font-size: .85rem; font-weight: 600; color: var(--text-dim);
+      border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
     }
-    .auth-tab:hover { color: var(--text); }
-    .auth-tab.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
+    .auth-tab:hover  { color: var(--text); }
+    .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
     .auth-form {
-      display: none;
-      flex-direction: column;
-      gap: 14px;
-      padding: 20px;
+      display: none; flex-direction: column; gap: 14px; padding: 20px;
     }
     .auth-form.active { display: flex; }
     .auth-form label {
@@ -450,39 +384,105 @@
       font-size: .82rem; color: var(--text-muted);
     }
     .auth-form input {
-      background: var(--bg);
-      border: 1px solid var(--surface-2);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      padding: 10px 12px;
-      font-size: .9rem;
-      transition: border-color .15s;
+      background: var(--bg); border: 1px solid var(--surface-2);
+      border-radius: var(--radius-sm); color: var(--text);
+      padding: 10px 12px; font-size: .9rem; transition: border-color .15s;
     }
     .auth-form input:focus { outline: none; border-color: var(--accent); }
     .auth-form input::placeholder { color: var(--text-dim); }
     .auth-error {
-      font-size: .8rem;
-      color: var(--danger);
-      background: var(--danger-soft);
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      display: none;
+      font-size: .8rem; color: var(--danger); background: var(--danger-soft);
+      border-radius: var(--radius-sm); padding: 8px 12px; display: none;
     }
     .auth-error.visible { display: block; }
     .btn-submit {
-      background: var(--accent);
-      border: none; border-radius: var(--radius-sm);
-      color: #0f172a; font-weight: 700;
-      padding: 11px; font-size: .9rem;
+      background: var(--accent); border: none; border-radius: var(--radius-sm);
+      color: #0f172a; font-weight: 700; padding: 11px; font-size: .9rem;
       transition: background .15s, opacity .15s;
     }
-    .btn-submit:hover { background: #67e8f9; }
+    .btn-submit:hover    { background: #67e8f9; }
     .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── My Bookings Side Panel ─────────────────────────────── */
+    #panel-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 150;
+      background: rgba(0,0,0,.5); backdrop-filter: blur(2px);
+    }
+    #panel-backdrop.open { display: block; }
+    #my-bookings-panel {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 151;
+      width: 400px; max-width: 100vw;
+      background: var(--surface); border-left: 1px solid var(--surface-2);
+      display: flex; flex-direction: column;
+      transform: translateX(100%); transition: transform .3s ease;
+      box-shadow: -4px 0 24px rgba(0,0,0,.4);
+    }
+    #my-bookings-panel.open { transform: translateX(0); }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px; border-bottom: 1px solid var(--surface-2); flex-shrink: 0;
+    }
+    .panel-header h2 { font-size: 1rem; font-weight: 700; }
+    .panel-tabs {
+      display: flex; border-bottom: 1px solid var(--surface-2); flex-shrink: 0;
+    }
+    .panel-tab {
+      flex: 1; background: none; border: none; padding: 12px;
+      font-size: .85rem; font-weight: 600; color: var(--text-dim);
+      border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+    }
+    .panel-tab:hover  { color: var(--text); }
+    .panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel-body {
+      flex: 1; overflow-y: auto; padding: 16px;
+      scrollbar-width: thin; scrollbar-color: var(--surface-2) transparent;
+    }
+    .panel-empty {
+      text-align: center; padding: 48px 20px;
+      color: var(--text-dim); font-size: .875rem; line-height: 1.8;
+    }
+    .panel-empty span { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+
+    /* Booking card in panel */
+    .booking-card {
+      background: var(--bg); border: 1px solid var(--surface-2);
+      border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px;
+      transition: border-color .15s;
+    }
+    .booking-card:hover { border-color: var(--surface-3); }
+    .booking-card__top {
+      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+    }
+    .booking-card__emoji { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+    .booking-card__info  { flex: 1; }
+    .booking-card__court { font-size: .9rem; font-weight: 600; color: var(--text); }
+    .booking-card__time  { font-size: .78rem; color: var(--text-muted); margin-top: 1px; }
+    .booking-card__price {
+      font-size: .85rem; font-weight: 700; color: var(--accent); flex-shrink: 0;
+    }
+    .booking-card__bottom {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .booking-card__date { font-size: .75rem; color: var(--text-dim); }
+    .btn-cancel-booking {
+      background: var(--danger-soft); border: 1px solid rgba(244,63,94,.3);
+      color: var(--danger); padding: 5px 12px; border-radius: var(--radius-sm);
+      font-size: .75rem; font-weight: 600; transition: all .15s;
+    }
+    .btn-cancel-booking:hover { background: var(--danger); color: #fff; }
+    .badge-completed {
+      font-size: .7rem; background: rgba(148,163,184,.1);
+      color: var(--text-dim); padding: 3px 10px; border-radius: 20px; font-weight: 500;
+    }
+    .panel-section-label {
+      font-size: .68rem; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--text-dim); margin: 12px 0 8px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Confirmation Banner -->
+  <!-- Banner -->
   <div id="banner" role="status" aria-live="polite">
     <span id="banner-msg"></span>
     <button id="banner-close" data-action="close-banner" aria-label="Dismiss">✕</button>
@@ -495,9 +495,7 @@
         <span class="header-icon">🏸</span>
         <h1>District <span>Badminton</span></h1>
       </div>
-      <div id="user-area">
-        <!-- Populated by renderUserArea() -->
-      </div>
+      <div id="user-area"></div>
     </div>
     <div class="header-meta">
       <span>Book courts at your local sports centers</span>
@@ -509,6 +507,25 @@
   <div id="date-strip-wrapper">
     <p class="strip-label">Select a date</p>
     <div id="date-strip" role="group" aria-label="Date selector"></div>
+  </div>
+
+  <!-- Search + Time Filter -->
+  <div id="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search courts by name or location…"
+        autocomplete="off"
+      />
+    </div>
+    <div class="time-pills" role="group" aria-label="Filter by time of day">
+      <button class="time-pill time-pill--active" data-action="time-filter" data-period="all">All</button>
+      <button class="time-pill" data-action="time-filter" data-period="Morning">Morning</button>
+      <button class="time-pill" data-action="time-filter" data-period="Afternoon">Afternoon</button>
+      <button class="time-pill" data-action="time-filter" data-period="Evening">Evening</button>
+    </div>
   </div>
 
   <!-- Courts Grid -->
@@ -527,7 +544,10 @@
         <div class="modal-title-group">
           <h3 id="modal-court-name"></h3>
           <p class="modal-subtitle" id="modal-court-loc"></p>
-          <p class="modal-date-line" id="modal-date-line"></p>
+          <div class="modal-meta-row">
+            <p class="modal-date-line"  id="modal-date-line"></p>
+            <p class="modal-price-line" id="modal-price-line"></p>
+          </div>
         </div>
         <button class="btn-close" data-action="close-modal" aria-label="Close">✕</button>
       </div>
@@ -546,33 +566,24 @@
         <button class="auth-tab active" data-tab="login">Sign In</button>
         <button class="auth-tab"        data-tab="register">Create Account</button>
       </div>
-
-      <!-- Sign-in form -->
       <form class="auth-form active" id="login-form" novalidate>
-        <label>
-          Email
+        <label>Email
           <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" required />
         </label>
-        <label>
-          Password
+        <label>Password
           <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required />
         </label>
         <p class="auth-error" id="login-error"></p>
         <button type="submit" class="btn-submit" id="login-submit">Sign In</button>
       </form>
-
-      <!-- Register form -->
       <form class="auth-form" id="register-form" novalidate>
-        <label>
-          Your name
+        <label>Your name
           <input type="text" id="reg-name" placeholder="Alex Johnson" autocomplete="name" required />
         </label>
-        <label>
-          Email
+        <label>Email
           <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" required />
         </label>
-        <label>
-          Password <span style="font-weight:400;font-size:.75rem;">(min 8 characters)</span>
+        <label>Password <span style="font-weight:400;font-size:.75rem;">(min 8 chars)</span>
           <input type="password" id="reg-password" placeholder="••••••••" autocomplete="new-password" required />
         </label>
         <p class="auth-error" id="reg-error"></p>
@@ -581,16 +592,29 @@
     </div>
   </div>
 
+  <!-- My Bookings Side Panel -->
+  <div id="panel-backdrop" data-action="close-my-bookings"></div>
+  <div id="my-bookings-panel" role="dialog" aria-modal="true" aria-label="My Bookings">
+    <div class="panel-header">
+      <h2>My Bookings</h2>
+      <button class="btn-close" data-action="close-my-bookings" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" data-panel-tab="upcoming">Upcoming</button>
+      <button class="panel-tab"        data-panel-tab="past">Past</button>
+    </div>
+    <div class="panel-body" id="panel-body"></div>
+  </div>
+
   <script>
     /* ────────────────────────────────────────────────────────────
-       DATA LAYER — hardcoded courts & time slots
+       COURTS DATA
     ──────────────────────────────────────────────────────────── */
     const COURTS = [
       {
-        id: "court-1",
-        name: "Smash Arena – Court 1",
+        id: "court-1", name: "Smash Arena – Court 1",
         location: "Block A, Level 2, District Sports Complex",
-        emoji: "🏸",
+        emoji: "🏸", basePrice: 400,
         slots: [
           { id: "c1-s1", time: "07:00 – 08:00", period: "Morning"   },
           { id: "c1-s2", time: "08:00 – 09:00", period: "Morning"   },
@@ -603,10 +627,9 @@
         ],
       },
       {
-        id: "court-2",
-        name: "Rally Point – Court 2",
+        id: "court-2", name: "Rally Point – Court 2",
         location: "Block B, Level 1, District Sports Complex",
-        emoji: "🎯",
+        emoji: "🎯", basePrice: 350,
         slots: [
           { id: "c2-s1", time: "06:00 – 07:00", period: "Morning"   },
           { id: "c2-s2", time: "07:00 – 08:00", period: "Morning"   },
@@ -619,10 +642,9 @@
         ],
       },
       {
-        id: "court-3",
-        name: "Shuttle Bay – Court 3",
+        id: "court-3", name: "Shuttle Bay – Court 3",
         location: "East Wing, Greenfield Sports Hub",
-        emoji: "⚡",
+        emoji: "⚡", basePrice: 500,
         slots: [
           { id: "c3-s1", time: "07:00 – 08:00", period: "Morning"   },
           { id: "c3-s2", time: "09:00 – 10:00", period: "Morning"   },
@@ -635,10 +657,9 @@
         ],
       },
       {
-        id: "court-4",
-        name: "Net Zone – Court 4",
+        id: "court-4", name: "Net Zone – Court 4",
         location: "West Wing, Greenfield Sports Hub",
-        emoji: "🌟",
+        emoji: "🌟", basePrice: 450,
         slots: [
           { id: "c4-s1", time: "06:00 – 07:00", period: "Morning"   },
           { id: "c4-s2", time: "08:00 – 09:00", period: "Morning"   },
@@ -656,24 +677,20 @@
        DATE HELPERS
     ──────────────────────────────────────────────────────────── */
     function dateToKey(d) {
-      const y   = d.getFullYear();
-      const m   = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     }
 
     function buildDays() {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const today = new Date(); today.setHours(0,0,0,0);
       return Array.from({ length: 8 }, (_, i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
+        const d = new Date(today); d.setDate(today.getDate() + i);
         return {
           key:     dateToKey(d),
           dayName: d.toLocaleDateString("en-GB", { weekday: "short" }),
           dayNum:  d.getDate(),
           month:   d.toLocaleDateString("en-GB", { month: "short" }),
           isToday: i === 0,
+          isWeekend: d.getDay() === 0 || d.getDay() === 6,
           full:    d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
         };
       });
@@ -682,70 +699,109 @@
     const DAYS = buildDays();
 
     /* ────────────────────────────────────────────────────────────
-       STATE
+       PRICING
     ──────────────────────────────────────────────────────────── */
-    let currentUser   = null;       // { id, name, email } | null
-    let dateBookings  = [];         // booking rows from API for selectedDate
-    let selectedDate  = DAYS[0].key;
-    let activeCourtId = null;
-    let bannerTimer   = null;
-    let authIntent    = null;       // { courtId, slotId } queued before login
+    function calculatePrice(court, dateKey) {
+      let price = court.basePrice;
+
+      // Weekend premium +25%
+      const day = DAYS.find(d => d.key === dateKey);
+      if (day?.isWeekend) price = Math.round(price * 1.25);
+
+      // Fill-rate surge
+      const booked   = dateBookings.filter(b => b.court_id === court.id).length;
+      const fillRate = booked / court.slots.length;
+      if      (fillRate > 0.8) price = Math.round(price * 1.35);
+      else if (fillRate > 0.6) price = Math.round(price * 1.20);
+      else if (fillRate > 0.4) price = Math.round(price * 1.10);
+
+      return price;
+    }
+
+    function getSurgeInfo(court, dateKey) {
+      const day      = DAYS.find(d => d.key === dateKey);
+      const booked   = dateBookings.filter(b => b.court_id === court.id).length;
+      const fillRate = booked / court.slots.length;
+
+      const tags = [];
+      if (day?.isWeekend) tags.push({ label: "Weekend", cls: "badge-tag--weekend" });
+      if      (fillRate > 0.8) tags.push({ label: "🔥 Almost full", cls: "badge-tag--surge" });
+      else if (fillRate > 0.6) tags.push({ label: "⚡ Filling fast", cls: "badge-tag--surge" });
+      else if (fillRate > 0.4) tags.push({ label: "↑ Popular",       cls: "badge-tag--surge" });
+
+      return { tags, fillRate };
+    }
 
     /* ────────────────────────────────────────────────────────────
-       API HELPERS
+       STATE
+    ──────────────────────────────────────────────────────────── */
+    let currentUser    = null;
+    let dateBookings   = [];
+    let myBookings     = [];
+    let selectedDate   = DAYS[0].key;
+    let activeCourtId  = null;
+    let bannerTimer    = null;
+    let authIntent     = null;
+    let searchQuery    = "";
+    let timeFilter     = "all";
+    let activePanelTab = "upcoming";
+
+    /* ────────────────────────────────────────────────────────────
+       API
     ──────────────────────────────────────────────────────────── */
     async function apiFetch(url, options = {}) {
       const res  = await fetch(url, {
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        ...options,
+        credentials: "same-origin", ...options,
       });
       const data = await res.json();
       if (!res.ok) {
         const err = new Error(data.error || "Request failed");
-        err.status = res.status;
-        throw err;
+        err.status = res.status; throw err;
       }
       return data;
     }
 
-    async function loadSession() {
-      const data = await apiFetch("/api/auth/me");
-      currentUser = data.user;
-    }
-
-    async function loadBookings(date) {
-      const data = await apiFetch(`/api/bookings?date=${date}`);
-      dateBookings = data.bookings;
-    }
-
-    /* ────────────────────────────────────────────────────────────
-       SLOT STATUS
-    ──────────────────────────────────────────────────────────── */
-    function getSlotStatus(courtId, slotId) {
-      const b = dateBookings.find(b => b.court_id === courtId && b.slot_id === slotId);
-      if (!b) return { status: "available" };
-      if (currentUser && b.user_id === currentUser.id)
-        return { status: "mine", bookingId: b.id };
-      return { status: "taken", userName: b.user_name };
+    async function loadSession()        { const d = await apiFetch("/api/auth/me"); currentUser = d.user; }
+    async function loadBookings(date)   { const d = await apiFetch(`/api/bookings?date=${date}`); dateBookings = d.bookings; }
+    async function loadMyBookings()     {
+      if (!currentUser) { myBookings = []; return; }
+      const d = await apiFetch("/api/bookings/mine");
+      myBookings = d.bookings;
     }
 
     /* ────────────────────────────────────────────────────────────
        HELPERS
     ──────────────────────────────────────────────────────────── */
-    const $ = (id) => document.getElementById(id);
+    const $ = id => document.getElementById(id);
 
     function groupSlotsByPeriod(slots) {
       const ORDER = ["Morning", "Afternoon", "Evening"];
-      return ORDER.reduce((acc, period) => {
-        const group = slots.filter(s => s.period === period);
-        if (group.length) acc[period] = group;
+      return ORDER.reduce((acc, p) => {
+        const g = slots.filter(s => s.period === p);
+        if (g.length) acc[p] = g;
         return acc;
       }, {});
     }
 
-    function selectedDayObj() {
-      return DAYS.find(d => d.key === selectedDate) ?? DAYS[0];
+    function selectedDayObj() { return DAYS.find(d => d.key === selectedDate) ?? DAYS[0]; }
+
+    function getSlotStatus(courtId, slotId) {
+      const b = dateBookings.find(b => b.court_id === courtId && b.slot_id === slotId);
+      if (!b) return { status: "available" };
+      if (currentUser && b.user_id === currentUser.id) return { status: "mine", bookingId: b.id };
+      return { status: "taken", userName: b.user_name };
+    }
+
+    function formatBookingDate(dateStr) {
+      // dateStr is "YYYY-MM-DD"
+      return new Date(dateStr + "T00:00:00").toLocaleDateString("en-IN", {
+        weekday: "short", day: "numeric", month: "short", year: "numeric",
+      });
+    }
+
+    function getCourtEmoji(courtId) {
+      return COURTS.find(c => c.id === courtId)?.emoji ?? "🏸";
     }
 
     /* ────────────────────────────────────────────────────────────
@@ -754,13 +810,18 @@
     function renderUserArea() {
       const el = $("user-area");
       if (currentUser) {
+        const upcomingCount = myBookings.filter(b => b.booking_date >= selectedDate).length;
         el.innerHTML = `
-          <span id="user-greeting">Hello, <strong>${currentUser.name}</strong></span>
+          <span id="user-greeting">Hi, <strong>${currentUser.name}</strong></span>
+          <button class="btn-my-bookings" data-action="open-my-bookings">
+            📋 My Bookings
+            ${upcomingCount > 0 ? `<span class="my-bookings-count">${upcomingCount}</span>` : ""}
+          </button>
           <button class="btn-auth btn-auth--ghost" data-action="logout">Sign Out</button>`;
       } else {
         el.innerHTML = `
-          <button class="btn-auth btn-auth--ghost" data-action="open-auth" data-tab="login">Sign In</button>
-          <button class="btn-auth btn-auth--primary" data-action="open-auth" data-tab="register">Register</button>`;
+          <button class="btn-auth btn-auth--ghost"    data-action="open-auth" data-tab="login">Sign In</button>
+          <button class="btn-auth btn-auth--primary"  data-action="open-auth" data-tab="register">Register</button>`;
       }
     }
 
@@ -768,50 +829,69 @@
        RENDER — Date Strip
     ──────────────────────────────────────────────────────────── */
     function renderDateStrip() {
-      const html = DAYS.map(d => {
-        const isSelected = d.key === selectedDate;
-        const classes = [
-          "date-btn",
-          d.isToday  ? "date-btn--today"    : "",
-          isSelected ? "date-btn--selected" : "",
-        ].filter(Boolean).join(" ");
-
+      $("date-strip").innerHTML = DAYS.map(d => {
+        const sel = d.key === selectedDate;
         return `
-          <button
-            class="${classes}"
-            data-action="select-date"
-            data-date="${d.key}"
-            aria-pressed="${isSelected}"
-            aria-label="${d.full}${d.isToday ? " (Today)" : ""}"
-          >
+          <button class="date-btn${d.isToday ? " date-btn--today" : ""}${sel ? " date-btn--selected" : ""}"
+            data-action="select-date" data-date="${d.key}"
+            aria-pressed="${sel}" aria-label="${d.full}${d.isToday ? " (Today)" : ""}">
             <span class="date-btn__day">${d.dayName}</span>
             <span class="date-btn__num">${d.dayNum}</span>
             <span class="date-btn__month">${d.month}</span>
           </button>`;
       }).join("");
-
-      $("date-strip").innerHTML = html;
     }
 
     /* ────────────────────────────────────────────────────────────
        RENDER — Courts Grid
     ──────────────────────────────────────────────────────────── */
+    function filteredCourts() {
+      const q = searchQuery.toLowerCase();
+      return COURTS.filter(c => {
+        const matchSearch = !q ||
+          c.name.toLowerCase().includes(q) ||
+          c.location.toLowerCase().includes(q);
+        const matchTime = timeFilter === "all" ||
+          c.slots.some(s => s.period === timeFilter);
+        return matchSearch && matchTime;
+      });
+    }
+
     function renderCourts() {
       const day = selectedDayObj();
       $("section-date-badge").textContent =
         day.isToday ? `Today · ${day.dayNum} ${day.month}` : `${day.dayName} · ${day.dayNum} ${day.month}`;
 
-      const html = COURTS.map(court => {
-        const totalSlots  = court.slots.length;
-        const myBookings  = court.slots.filter(s => {
-          const st = getSlotStatus(court.id, s.id);
-          return st.status === "mine";
+      const courts = filteredCourts();
+
+      if (!courts.length) {
+        $("courts-grid").innerHTML = `<p class="no-results">No courts match your search. Try a different filter.</p>`;
+        return;
+      }
+
+      $("courts-grid").innerHTML = courts.map(court => {
+        const slots        = timeFilter === "all"
+          ? court.slots
+          : court.slots.filter(s => s.period === timeFilter);
+        const totalInView  = slots.length;
+        const totalAll     = court.slots.length;
+        const bookedAll    = court.slots.filter(s => {
+          const st = getSlotStatus(court.id, s.id); return st.status !== "available";
         }).length;
-        const takenSlots  = court.slots.filter(s => {
-          const st = getSlotStatus(court.id, s.id);
-          return st.status === "taken" || st.status === "mine";
-        }).length;
-        const freeCount   = totalSlots - takenSlots;
+        const myCount      = court.slots.filter(s => getSlotStatus(court.id, s.id).status === "mine").length;
+        const freeInView   = slots.filter(s => getSlotStatus(court.id, s.id).status === "available").length;
+
+        const price        = calculatePrice(court, selectedDate);
+        const { tags, fillRate } = getSurgeInfo(court, selectedDate);
+        const fillPct      = Math.round(fillRate * 100);
+        const barCls       = fillRate > 0.7 ? "high" : fillRate > 0.4 ? "medium" : "low";
+
+        const tagsHtml     = tags.map(t =>
+          `<span class="badge-tag ${t.cls}">${t.label}</span>`
+        ).join("");
+
+        const surgeLabel   = tags.filter(t => t.cls === "badge-tag--surge")
+          .map(t => `<div class="price-badge__surge">${t.label}</div>`).join("");
 
         return `
           <article class="court-card">
@@ -821,21 +901,31 @@
                 <h2>${court.name}</h2>
                 <p class="card-location">${court.location}</p>
               </div>
+              <div class="price-badge">
+                <div class="price-badge__amount">₹${price}<span>/hr</span></div>
+                ${surgeLabel}
+                ${tagsHtml ? `<div class="price-badge__tags">${tagsHtml}</div>` : ""}
+              </div>
             </div>
             <div class="card-stats">
-              <span class="stat-pill available">${freeCount} available</span>
-              ${myBookings > 0 ? `<span class="stat-pill booked">${myBookings} booked by you</span>` : ""}
+              <span class="stat-pill available">
+                ${freeInView} available${timeFilter !== "all" ? ` (${timeFilter})` : ""}
+              </span>
+              ${myCount > 0 ? `<span class="stat-pill booked">${myCount} booked by you</span>` : ""}
             </div>
-            <button
-              class="btn-view"
-              data-action="open-modal"
-              data-court="${court.id}"
-              aria-label="View slots for ${court.name}"
-            >View Slots →</button>
+            <div class="court-progress-wrap">
+              <div class="court-progress">
+                <div class="court-progress__bar court-progress__bar--${barCls}" style="width:${fillPct}%"></div>
+              </div>
+              <div class="court-progress__label">
+                <span>${totalAll - bookedAll} of ${totalAll} slots remaining</span>
+                <span>${fillPct}% filled</span>
+              </div>
+            </div>
+            <button class="btn-view" data-action="open-modal" data-court="${court.id}"
+              aria-label="View slots for ${court.name}">View Slots →</button>
           </article>`;
       }).join("");
-
-      $("courts-grid").innerHTML = html;
     }
 
     /* ────────────────────────────────────────────────────────────
@@ -845,59 +935,53 @@
       const court = COURTS.find(c => c.id === courtId);
       if (!court) return;
 
-      const day = selectedDayObj();
+      const day   = selectedDayObj();
+      const price = calculatePrice(court, selectedDate);
+      const { tags } = getSurgeInfo(court, selectedDate);
+      const surgeTag = tags.find(t => t.cls === "badge-tag--surge");
+
       $("modal-court-name").textContent = court.name;
       $("modal-court-loc").textContent  = court.location;
-      $("modal-date-line").textContent  =
-        `📅 ${day.full}${day.isToday ? " (Today)" : ""}`;
+      $("modal-date-line").textContent  = `📅 ${day.full}${day.isToday ? " (Today)" : ""}`;
+      $("modal-price-line").textContent = `₹${price}/hr${surgeTag ? " " + surgeTag.label : ""}`;
 
       const grouped    = groupSlotsByPeriod(court.slots);
-      const signInNote = !currentUser
-        ? `<p class="modal-sign-in-note">
-            🔒 <span><button data-action="open-auth" data-tab="login">Sign in</button> to book a slot</span>
-           </p>`
-        : "";
+      const signInNote = !currentUser ? `
+        <p class="modal-sign-in-note">🔒
+          <span><button data-action="open-auth" data-tab="login">Sign in</button> to book a slot</span>
+        </p>` : "";
 
       const periodsHtml = Object.entries(grouped).map(([period, slots]) => {
+        const isDimmed = timeFilter !== "all" && period !== timeFilter;
+
         const slotsHtml = slots.map(slot => {
           const st = getSlotStatus(court.id, slot.id);
-
-          if (st.status === "mine") {
-            return `
-              <button
-                class="slot-btn slot-btn--mine"
-                data-action="cancel-slot"
-                data-booking-id="${st.bookingId}"
-                data-court="${court.id}"
-                aria-pressed="true"
-                title="Click to cancel your booking"
-              >${slot.time}<span class="slot-badge">✓ Yours</span></button>`;
-          }
-
-          if (st.status === "taken") {
-            return `
-              <button class="slot-btn slot-btn--taken" disabled aria-disabled="true"
-                title="Booked by ${st.userName}"
-              >${slot.time} · Taken</button>`;
-          }
-
+          if (st.status === "mine") return `
+            <button class="slot-btn slot-btn--mine"
+              data-action="cancel-slot" data-booking-id="${st.bookingId}" data-court="${court.id}"
+              aria-pressed="true" title="Click to cancel">
+              ${slot.time}<span class="slot-badge">✓ Yours</span>
+            </button>`;
+          if (st.status === "taken") return `
+            <button class="slot-btn slot-btn--taken" disabled
+              title="Booked by ${st.userName}">${slot.time} · Taken</button>`;
           // available
-          const action = currentUser ? "book-slot" : "open-auth";
-          const extra  = currentUser
-            ? `data-slot="${slot.id}" data-court="${court.id}" data-time="${slot.time}"`
-            : `data-tab="login" data-intent-court="${court.id}" data-intent-slot="${slot.id}"`;
+          if (currentUser) return `
+            <button class="slot-btn"
+              data-action="book-slot" data-slot="${slot.id}" data-court="${court.id}" data-time="${slot.time}"
+              aria-pressed="false">
+              ${slot.time}
+            </button>`;
           return `
-            <button
-              class="slot-btn"
-              data-action="${action}"
-              ${extra}
-              aria-pressed="false"
-              title="${currentUser ? "Click to book" : "Sign in to book"}"
-            >${slot.time}</button>`;
+            <button class="slot-btn"
+              data-action="open-auth" data-tab="login"
+              data-intent-court="${court.id}" data-intent-slot="${slot.id}" data-intent-time="${slot.time}">
+              ${slot.time}
+            </button>`;
         }).join("");
 
         return `
-          <div class="period-group">
+          <div class="period-group${isDimmed ? " period-group--dimmed" : ""}">
             <p class="period-label">${period}</p>
             <div class="slots-row">${slotsHtml}</div>
           </div>`;
@@ -905,14 +989,11 @@
 
       $("modal-body").innerHTML = signInNote + periodsHtml + `
         <p class="modal-hint">
-          ${currentUser
-            ? "Tap a slot to book · Tap <em>Yours</em> (hover shows red) to cancel"
-            : "Sign in to make a booking"}
+          ${currentUser ? "Tap to book · Tap <em>Yours</em> to cancel" : "Sign in to book a slot"}
         </p>`;
 
       $("modal-overlay").classList.add("open");
       activeCourtId = courtId;
-
       const firstBtn = $("modal-overlay").querySelector("button");
       if (firstBtn) firstBtn.focus();
     }
@@ -924,19 +1005,96 @@
     }
 
     /* ────────────────────────────────────────────────────────────
-       RENDER — Confirmation Banner
+       RENDER — My Bookings Panel
     ──────────────────────────────────────────────────────────── */
-    function showBanner(message) {
+    function renderMyBookingsPanel() {
+      const today = DAYS[0].key;
+      const upcoming = myBookings.filter(b => b.booking_date >= today);
+      const past     = myBookings.filter(b => b.booking_date <  today).reverse();
+      const list     = activePanelTab === "upcoming" ? upcoming : past;
+
+      // Update tab labels with counts
+      document.querySelectorAll(".panel-tab").forEach(t => {
+        const count = t.dataset.panelTab === "upcoming" ? upcoming.length : past.length;
+        t.textContent = `${t.dataset.panelTab === "upcoming" ? "Upcoming" : "Past"} (${count})`;
+        t.classList.toggle("active", t.dataset.panelTab === activePanelTab);
+      });
+
+      if (!list.length) {
+        $("panel-body").innerHTML = `
+          <div class="panel-empty">
+            <span>${activePanelTab === "upcoming" ? "📅" : "🏸"}</span>
+            ${activePanelTab === "upcoming"
+              ? "No upcoming bookings.<br>Select a date and book a court!"
+              : "No past bookings yet."}
+          </div>`;
+        return;
+      }
+
+      // Group upcoming by date
+      const grouped = list.reduce((acc, b) => {
+        const k = b.booking_date;
+        if (!acc[k]) acc[k] = [];
+        acc[k].push(b); return acc;
+      }, {});
+
+      $("panel-body").innerHTML = Object.entries(grouped).map(([date, bookings]) => {
+        const dayLabel = date === today
+          ? "Today"
+          : new Date(date + "T00:00:00").toLocaleDateString("en-IN", {
+              weekday: "long", day: "numeric", month: "short",
+            });
+
+        const cardsHtml = bookings.map(b => {
+          const court = COURTS.find(c => c.id === b.court_id);
+          const price = court ? calculatePrice(court, b.booking_date) : "—";
+          const isUpcoming = b.booking_date >= today;
+
+          return `
+            <div class="booking-card">
+              <div class="booking-card__top">
+                <span class="booking-card__emoji">${getCourtEmoji(b.court_id)}</span>
+                <div class="booking-card__info">
+                  <p class="booking-card__court">${b.court_name}</p>
+                  <p class="booking-card__time">${b.slot_time}</p>
+                </div>
+                <span class="booking-card__price">₹${price}</span>
+              </div>
+              <div class="booking-card__bottom">
+                <span class="booking-card__date">${formatBookingDate(b.booking_date)}</span>
+                ${isUpcoming
+                  ? `<button class="btn-cancel-booking" data-action="cancel-my-booking"
+                       data-booking-id="${b.id}" data-court="${b.court_id}">Cancel</button>`
+                  : `<span class="badge-completed">Completed</span>`}
+              </div>
+            </div>`;
+        }).join("");
+
+        return `<p class="panel-section-label">${dayLabel}</p>${cardsHtml}`;
+      }).join("");
+    }
+
+    function openMyBookingsPanel() {
+      $("my-bookings-panel").classList.add("open");
+      $("panel-backdrop").classList.add("open");
+      renderMyBookingsPanel();
+    }
+
+    function closeMyBookingsPanel() {
+      $("my-bookings-panel").classList.remove("open");
+      $("panel-backdrop").classList.remove("open");
+    }
+
+    /* ────────────────────────────────────────────────────────────
+       RENDER — Banner
+    ──────────────────────────────────────────────────────────── */
+    function showBanner(msg) {
       clearTimeout(bannerTimer);
-      $("banner-msg").textContent = message;
+      $("banner-msg").textContent = msg;
       $("banner").classList.add("visible");
       bannerTimer = setTimeout(() => $("banner").classList.remove("visible"), 3500);
     }
-
-    function hideBanner() {
-      clearTimeout(bannerTimer);
-      $("banner").classList.remove("visible");
-    }
+    function hideBanner() { clearTimeout(bannerTimer); $("banner").classList.remove("visible"); }
 
     /* ────────────────────────────────────────────────────────────
        AUTH MODAL
@@ -944,104 +1102,57 @@
     function openAuth(tab = "login") {
       switchAuthTab(tab);
       $("auth-overlay").classList.add("open");
-      const firstInput = $("auth-modal").querySelector("input");
-      if (firstInput) setTimeout(() => firstInput.focus(), 50);
+      setTimeout(() => $("auth-modal").querySelector("input")?.focus(), 50);
     }
-
-    function closeAuth() {
-      $("auth-overlay").classList.remove("open");
-      authIntent = null;
-    }
+    function closeAuth() { $("auth-overlay").classList.remove("open"); authIntent = null; }
 
     function switchAuthTab(tab) {
-      document.querySelectorAll(".auth-tab").forEach(t =>
-        t.classList.toggle("active", t.dataset.tab === tab)
-      );
-      document.querySelectorAll(".auth-form").forEach(f =>
-        f.classList.toggle("active", f.id === `${tab}-form`)
-      );
+      document.querySelectorAll(".auth-tab").forEach(t  => t.classList.toggle("active", t.dataset.tab === tab));
+      document.querySelectorAll(".auth-form").forEach(f => f.classList.toggle("active", f.id === `${tab}-form`));
       clearAuthErrors();
     }
-
     function clearAuthErrors() {
-      document.querySelectorAll(".auth-error").forEach(el => {
-        el.textContent = "";
-        el.classList.remove("visible");
-      });
+      document.querySelectorAll(".auth-error").forEach(e => { e.textContent = ""; e.classList.remove("visible"); });
+    }
+    function showAuthError(id, msg) { const e = $(id); e.textContent = msg; e.classList.add("visible"); }
+    function setLoading(btnId, on, label) {
+      const b = $(btnId); b.disabled = on; b.textContent = on ? "Please wait…" : label;
     }
 
-    function showAuthError(id, msg) {
-      const el = $(id);
-      el.textContent = msg;
-      el.classList.add("visible");
-    }
-
-    function setSubmitLoading(btnId, loading) {
-      const btn = $(btnId);
-      btn.disabled  = loading;
-      btn.textContent = loading ? "Please wait…" : (btnId === "login-submit" ? "Sign In" : "Create Account");
-    }
-
-    /* ────────────────────────────────────────────────────────────
-       AUTH FORM SUBMISSIONS
-    ──────────────────────────────────────────────────────────── */
-    $("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearAuthErrors();
-      const email    = $("login-email").value.trim();
-      const password = $("login-password").value;
-
-      setSubmitLoading("login-submit", true);
+    $("login-form").addEventListener("submit", async e => {
+      e.preventDefault(); clearAuthErrors();
+      setLoading("login-submit", true, "Sign In");
       try {
-        const data  = await apiFetch("/api/auth/login", {
-          method: "POST",
-          body:   JSON.stringify({ email, password }),
-        });
+        const data = await apiFetch("/api/auth/login", { method: "POST",
+          body: JSON.stringify({ email: $("login-email").value.trim(), password: $("login-password").value }) });
         currentUser = data.user;
         closeAuth();
-        renderUserArea();
-        await loadBookings(selectedDate);
-        renderCourts();
+        await Promise.all([loadBookings(selectedDate), loadMyBookings()]);
+        renderUserArea(); renderCourts();
         if (activeCourtId) renderModal(activeCourtId);
-        // Execute pending booking if user clicked a slot before logging in
         if (authIntent) {
-          const { courtId, slotId, time } = authIntent;
-          authIntent = null;
+          const { courtId, slotId, time } = authIntent; authIntent = null;
           await doBookSlot(courtId, slotId, time);
         }
         showBanner(`Welcome back, ${data.user.name}!`);
-      } catch (err) {
-        showAuthError("login-error", err.message);
-      } finally {
-        setSubmitLoading("login-submit", false);
-      }
+      } catch (err) { showAuthError("login-error", err.message); }
+      finally { setLoading("login-submit", false, "Sign In"); }
     });
 
-    $("register-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      clearAuthErrors();
-      const name     = $("reg-name").value.trim();
-      const email    = $("reg-email").value.trim();
-      const password = $("reg-password").value;
-
-      setSubmitLoading("reg-submit", true);
+    $("register-form").addEventListener("submit", async e => {
+      e.preventDefault(); clearAuthErrors();
+      setLoading("reg-submit", true, "Create Account");
       try {
-        const data  = await apiFetch("/api/auth/register", {
-          method: "POST",
-          body:   JSON.stringify({ name, email, password }),
-        });
+        const data = await apiFetch("/api/auth/register", { method: "POST",
+          body: JSON.stringify({ name: $("reg-name").value.trim(), email: $("reg-email").value.trim(), password: $("reg-password").value }) });
         currentUser = data.user;
         closeAuth();
-        renderUserArea();
-        await loadBookings(selectedDate);
-        renderCourts();
+        await Promise.all([loadBookings(selectedDate), loadMyBookings()]);
+        renderUserArea(); renderCourts();
         if (activeCourtId) renderModal(activeCourtId);
         showBanner(`Account created! Welcome, ${data.user.name} 🎉`);
-      } catch (err) {
-        showAuthError("reg-error", err.message);
-      } finally {
-        setSubmitLoading("reg-submit", false);
-      }
+      } catch (err) { showAuthError("reg-error", err.message); }
+      finally { setLoading("reg-submit", false, "Create Account"); }
     });
 
     /* ────────────────────────────────────────────────────────────
@@ -1051,53 +1162,39 @@
       const court = COURTS.find(c => c.id === courtId);
       if (!court) return;
       try {
-        await apiFetch("/api/bookings", {
-          method: "POST",
-          body:   JSON.stringify({
-            courtId,
-            courtName: court.name,
-            slotId,
-            slotTime:  time,
-            date:      selectedDate,
-          }),
-        });
-        await loadBookings(selectedDate);
-        renderCourts();
+        await apiFetch("/api/bookings", { method: "POST",
+          body: JSON.stringify({ courtId, courtName: court.name, slotId, slotTime: time, date: selectedDate }) });
+        await Promise.all([loadBookings(selectedDate), loadMyBookings()]);
+        renderUserArea(); renderCourts();
         if (activeCourtId === courtId) renderModal(courtId);
-        const day       = selectedDayObj();
-        const dateLabel = day.isToday ? "Today" : `${day.dayName} ${day.dayNum} ${day.month}`;
-        showBanner(`Booked: ${court.name} · ${time} · ${dateLabel}`);
+        if ($("my-bookings-panel").classList.contains("open")) renderMyBookingsPanel();
+        const day = selectedDayObj();
+        showBanner(`Booked: ${court.name} · ${time} · ${day.isToday ? "Today" : `${day.dayName} ${day.dayNum} ${day.month}`}`);
       } catch (err) {
         if (err.status === 409) {
-          // Someone else just booked it — refresh and show updated state
-          await loadBookings(selectedDate);
-          renderCourts();
-          if (activeCourtId === courtId) renderModal(courtId);
+          await Promise.all([loadBookings(selectedDate), loadMyBookings()]);
+          renderCourts(); if (activeCourtId === courtId) renderModal(courtId);
           showBanner("Sorry, that slot was just taken by someone else.");
-        } else {
-          showBanner(`Booking failed: ${err.message}`);
-        }
+        } else { showBanner(`Booking failed: ${err.message}`); }
       }
     }
 
     async function doCancelSlot(bookingId, courtId) {
       try {
         await apiFetch(`/api/bookings/${bookingId}`, { method: "DELETE" });
-        await loadBookings(selectedDate);
-        renderCourts();
+        await Promise.all([loadBookings(selectedDate), loadMyBookings()]);
+        renderUserArea(); renderCourts();
         if (activeCourtId === courtId) renderModal(courtId);
-      } catch (err) {
-        showBanner(`Cancel failed: ${err.message}`);
-      }
+        if ($("my-bookings-panel").classList.contains("open")) renderMyBookingsPanel();
+      } catch (err) { showBanner(`Cancel failed: ${err.message}`); }
     }
 
     /* ────────────────────────────────────────────────────────────
-       EVENT DELEGATION — single listener on body
+       EVENT DELEGATION
     ──────────────────────────────────────────────────────────── */
-    document.body.addEventListener("click", async (e) => {
+    document.body.addEventListener("click", async e => {
       const el = e.target.closest("[data-action]");
       if (!el) return;
-
       const action = el.dataset.action;
 
       if (action === "select-date") {
@@ -1108,59 +1205,52 @@
         if (activeCourtId) renderModal(activeCourtId);
         return;
       }
-
-      if (action === "open-modal") {
-        renderModal(el.dataset.court);
-        return;
-      }
-
-      if (action === "close-modal") {
-        closeModal();
-        return;
-      }
-
-      if (action === "close-banner") {
-        hideBanner();
-        return;
-      }
-
-      if (action === "open-auth") {
-        // If triggered from a slot button, remember the intent
-        if (el.dataset.intentCourt) {
-          authIntent = {
-            courtId: el.dataset.intentCourt,
-            slotId:  el.dataset.intentSlot,
-            time:    el.textContent.trim(),
-          };
-        }
-        openAuth(el.dataset.tab ?? "login");
-        return;
-      }
-
-      if (action === "close-auth") {
-        closeAuth();
-        return;
-      }
-
-      if (action === "logout") {
-        await apiFetch("/api/auth/logout", { method: "POST" });
-        currentUser   = null;
-        dateBookings  = await apiFetch(`/api/bookings?date=${selectedDate}`).then(d => d.bookings);
-        renderUserArea();
+      if (action === "time-filter") {
+        timeFilter = el.dataset.period;
+        document.querySelectorAll(".time-pill").forEach(p =>
+          p.classList.toggle("time-pill--active", p.dataset.period === timeFilter));
         renderCourts();
         if (activeCourtId) renderModal(activeCourtId);
         return;
       }
-
+      if (action === "open-modal")  { renderModal(el.dataset.court); return; }
+      if (action === "close-modal") { closeModal(); return; }
+      if (action === "close-banner"){ hideBanner(); return; }
+      if (action === "open-auth") {
+        if (el.dataset.intentCourt) {
+          authIntent = { courtId: el.dataset.intentCourt, slotId: el.dataset.intentSlot, time: el.dataset.intentTime };
+        }
+        openAuth(el.dataset.tab ?? "login"); return;
+      }
+      if (action === "close-auth")  { closeAuth(); return; }
+      if (action === "open-my-bookings")  { openMyBookingsPanel(); return; }
+      if (action === "close-my-bookings") { closeMyBookingsPanel(); return; }
+      if (action === "logout") {
+        await apiFetch("/api/auth/logout", { method: "POST" });
+        currentUser = null; myBookings = [];
+        await loadBookings(selectedDate);
+        renderUserArea(); renderCourts();
+        if (activeCourtId) renderModal(activeCourtId);
+        closeMyBookingsPanel();
+        return;
+      }
       if (action === "book-slot") {
-        await doBookSlot(el.dataset.court, el.dataset.slot, el.dataset.time);
-        return;
+        await doBookSlot(el.dataset.court, el.dataset.slot, el.dataset.time); return;
       }
-
       if (action === "cancel-slot") {
-        await doCancelSlot(el.dataset.bookingId, el.dataset.court);
-        return;
+        await doCancelSlot(el.dataset.bookingId, el.dataset.court); return;
       }
+      if (action === "cancel-my-booking") {
+        await doCancelSlot(el.dataset.bookingId, el.dataset.court); return;
+      }
+    });
+
+    // Panel tab switching
+    document.querySelectorAll(".panel-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activePanelTab = btn.dataset.panelTab;
+        renderMyBookingsPanel();
+      });
     });
 
     // Auth tab switching
@@ -1168,41 +1258,35 @@
       btn.addEventListener("click", () => switchAuthTab(btn.dataset.tab));
     });
 
-    // Close modals on backdrop click
-    $("modal-overlay").addEventListener("click", (e) => {
-      if (e.target === $("modal-overlay")) closeModal();
+    // Search input
+    $("search-input").addEventListener("input", e => {
+      searchQuery = e.target.value.trim();
+      renderCourts();
     });
-    $("auth-overlay").addEventListener("click", (e) => {
-      if (e.target === $("auth-overlay")) closeAuth();
-    });
+
+    // Backdrop clicks
+    $("modal-overlay").addEventListener("click", e => { if (e.target === $("modal-overlay")) closeModal(); });
+    $("auth-overlay").addEventListener("click",  e => { if (e.target === $("auth-overlay"))  closeAuth(); });
 
     /* ────────────────────────────────────────────────────────────
-       KEYBOARD HANDLING
+       KEYBOARD
     ──────────────────────────────────────────────────────────── */
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", e => {
       if (e.key === "Escape") {
-        if ($("auth-overlay").classList.contains("open")) { closeAuth(); return; }
-        if (activeCourtId !== null) { closeModal(); return; }
+        if ($("auth-overlay").classList.contains("open"))       { closeAuth(); return; }
+        if ($("my-bookings-panel").classList.contains("open"))  { closeMyBookingsPanel(); return; }
+        if (activeCourtId !== null)                             { closeModal(); return; }
       }
-
       if (e.key === "Tab") {
-        const openModal = $("auth-overlay").classList.contains("open")
-          ? $("auth-modal")
+        const openModal = $("auth-overlay").classList.contains("open") ? $("auth-modal")
           : activeCourtId !== null ? $("modal") : null;
-
         if (!openModal) return;
         const focusable = [...openModal.querySelectorAll(
-          'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
-        )];
+          'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])')];
         if (focusable.length < 2) return;
-
-        const first = focusable[0];
-        const last  = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
-        } else {
-          if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
-        }
+        const first = focusable[0], last = focusable[focusable.length-1];
+        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+        else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
       }
     });
 
@@ -1213,9 +1297,8 @@
       $("today-date").textContent = new Date().toLocaleDateString("en-GB", {
         weekday: "long", year: "numeric", month: "long", day: "numeric",
       });
-
       await Promise.all([loadSession(), loadBookings(selectedDate)]);
-
+      await loadMyBookings();
       renderUserArea();
       renderDateStrip();
       renderCourts();
