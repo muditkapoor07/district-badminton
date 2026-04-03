@@ -794,10 +794,15 @@
     }
 
     function formatBookingDate(dateStr) {
-      // dateStr is "YYYY-MM-DD"
-      return new Date(dateStr + "T00:00:00").toLocaleDateString("en-IN", {
+      // Normalize to "YYYY-MM-DD" — pg serializes DATE as a full ISO string
+      const ymd = String(dateStr).slice(0, 10);
+      return new Date(ymd + "T00:00:00").toLocaleDateString("en-IN", {
         weekday: "short", day: "numeric", month: "short", year: "numeric",
       });
+    }
+
+    function normalizeDate(dateStr) {
+      return String(dateStr).slice(0, 10);
     }
 
     function getCourtEmoji(courtId) {
@@ -1009,8 +1014,8 @@
     ──────────────────────────────────────────────────────────── */
     function renderMyBookingsPanel() {
       const today = DAYS[0].key;
-      const upcoming = myBookings.filter(b => b.booking_date >= today);
-      const past     = myBookings.filter(b => b.booking_date <  today).reverse();
+      const upcoming = myBookings.filter(b => normalizeDate(b.booking_date) >= today);
+      const past     = myBookings.filter(b => normalizeDate(b.booking_date) <  today).reverse();
       const list     = activePanelTab === "upcoming" ? upcoming : past;
 
       // Update tab labels with counts
@@ -1033,7 +1038,7 @@
 
       // Group upcoming by date
       const grouped = list.reduce((acc, b) => {
-        const k = b.booking_date;
+        const k = normalizeDate(b.booking_date);
         if (!acc[k]) acc[k] = [];
         acc[k].push(b); return acc;
       }, {});
@@ -1047,8 +1052,8 @@
 
         const cardsHtml = bookings.map(b => {
           const court = COURTS.find(c => c.id === b.court_id);
-          const price = court ? calculatePrice(court, b.booking_date) : "—";
-          const isUpcoming = b.booking_date >= today;
+          const price = court ? calculatePrice(court, normalizeDate(b.booking_date)) : "—";
+          const isUpcoming = normalizeDate(b.booking_date) >= today;
 
           return `
             <div class="booking-card">
