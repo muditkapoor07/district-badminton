@@ -8,6 +8,9 @@ const bookingRoutes = require("./routes/bookings");
 
 const app = express();
 
+// Required for secure cookies to work behind Render's reverse proxy
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -18,7 +21,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure:   process.env.NODE_ENV === "production",
+      secure:   true,   // Render always serves over HTTPS
+      sameSite: "lax",
       maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
